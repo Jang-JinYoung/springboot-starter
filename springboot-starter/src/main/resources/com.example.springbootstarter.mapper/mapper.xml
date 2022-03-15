@@ -5,4 +5,61 @@
 
 <mapper namespace="com.example.springbootstarter.mapper.Mapper">
 
+<select id="getBoardList" parameterType="board" resultType="board">
+        select *,
+                if(substr(now(), 1, 10) = substr(writeDate, 1, 10), substr(writeDate, 12, 5), replace(substr(writeDate, 3, 8), '-', '.')) as writeTime,
+                (select count(text) from comment where board_id = board.id group by board_id) as comments
+        from board 
+        where title like concat ('%', #{search}, '%')
+        order by writeDate desc limit #{page}, 10;
+</select>
+
+<select id="getBoard" parameterType="int" resultType="board">
+        select * from board where id = #{id}
+</select>
+
+<select id="getBoardSize" parameterType="board" resultType="int">
+        select ceil(count(id)/10) as boardSize from board where title like concat ('%', #{search}, '%') 
+</select>
+
+<select id="getUser" parameterType="user" resultType="user">
+        select * from user where id = #{id} and pw = #{pw}
+</select>
+
+<insert id="writeBoard" parameterType="board" >
+        insert into board (title, writer, country, text) values (#{title}, #{writer}, #{country}, #{text})
+</insert>
+
+<select id="getCommentList" parameterType="hashmap" resultType="comment">
+        select 
+                A.id as id,
+                A.text as text,
+                B.nickname as nickname,
+                if(substr(now(), 1, 10) = substr(writeDate, 1, 10), substr(writeDate, 12, 5),
+                        replace(substr(writeDate, 3, 8), '-', '.')) as writeTime
+        from comment as A
+                inner join user as B
+                        on A.writer = B.no
+        where board_id = #{board_id}
+        order by writeDate desc
+        limit #{page}, 10
+</select>
+
+<select id="getCommentPaging" parameterType="Integer" resultType="Integer">
+        select ceil(count(id)/10) as paging from comment where board_id = #{board_id}
+</select>
+
+<insert id="writeComment" parameterType="comment">
+        insert into comment (text, writer, board_id) values (#{text}, 1, #{board_id})
+</insert>
+
+<update id="updateBoard" parameterType="board" >
+        update board set title = #{title}, text = #{text} where id = #{id}
+</update>
+
+<delete id="deleteBoard" parameterType="board">
+        delete from board where id = #{id}
+</delete>
+
+
 </mapper>

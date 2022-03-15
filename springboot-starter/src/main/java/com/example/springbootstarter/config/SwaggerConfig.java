@@ -18,7 +18,7 @@ public class SwaggerConfig {
     private ApiInfo apiInfo() {
 
         return new ApiInfoBuilder()
-                .title("MeetingLog Backend API")
+                .title("")
                 .build();
     }
 
